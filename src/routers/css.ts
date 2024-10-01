@@ -1,8 +1,19 @@
 import express from 'express';
 import {Response} from "express";
-import {getCSSs, createCSS, deleteCSS, getValidIDs, CSSCategory, cssCategories} from '../controllers/css';
-import {CSS} from "../controllers/css";
-import {ErrRes} from "../util";
+import {
+    getCSSs,
+    createCSS,
+    deleteCSS,
+    getValidIDs,
+    CSSCategory,
+    cssCategories,
+    CSS,
+    getCSS,
+    updateCSS
+} from '../controllers/css';
+import {getUserByID} from '../controllers/user';
+import {ErrRes, isOfType, pick} from "../util";
+import {match, P} from "ts-pattern";
 
 const router = express.Router();
 
@@ -67,6 +78,62 @@ router.post('/', async (req, res: Response<number | ErrRes>) => {
         return;
     }
 });
+
+
+router.patch('/', async (req, res: Response<void | ErrRes>) => {
+    let id = req.body.id;
+    let password_hashed = req.body.password_hashed;
+
+    if (typeof id !== 'number' || typeof password_hashed !== 'string') {
+        res.status(400).json(ErrRes("Bad request"));
+        return;
+    }
+
+    let css = await getCSS(id);
+    if (css instanceof Error) {
+        res.status(400).json(ErrRes(css.message));
+        return;
+    }
+
+    let author = await getUserByID(css.author_id);
+
+    if (author instanceof Error) {
+        res.status(400).json(ErrRes(author.message));
+        return;
+    }
+
+    if (author.password_hashed !== password_hashed) {
+        res.status(400).json(ErrRes("Author verification failed"));
+        return;
+    }
+
+    if (match<unknown, boolean>(req.body)
+        .with({
+            name: P.optional(P.string),
+            html: P.optional(P.string),
+            css: P.optional(P.string),
+            category: P.optional(P.union(...cssCategories)),
+        }, _ => true)
+        .otherwise(_ => false))
+    {
+        let properties: {
+            name?: string,
+            html?: string,
+            css?: string,
+            category?: CSSCategory,
+        } = pick(req.body, ["name", "html", "css", "category"]);
+
+        let err = await updateCSS(id, properties);
+        if (err instanceof Error) {
+            res.status(400).json(ErrRes(err.message));
+        } else {
+            res.status(200).json();
+        }
+    } else {
+        res.status(400).json(ErrRes("Bad request"));
+    }
+});
+
 
 router.delete('/', async (req, res: Response<void | ErrRes>) => {
     let id = req.query.id;

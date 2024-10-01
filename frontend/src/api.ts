@@ -115,6 +115,31 @@ export async function createCSSStyle(userID: number, password_hashed: string, na
     }
 }
 
+export async function updateCSSStyle(cssID: number, password_hashed: string, parameters: {
+    name?: string,
+    html?: string,
+    css?: string,
+    category?: CSSCategory,
+}): Promise<void | Error> {
+    let requestBody: Record<string, unknown> = {
+        id: cssID,
+        password_hashed: password_hashed,
+    };
+    for (let keys in parameters) {
+        requestBody[keys] = parameters[keys as keyof typeof parameters];
+    }
+    let res = await fetch('/api/css', {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+    });
+    if (!res.ok) {
+        return Error((await res.json() as {error: string}).error);
+    }
+}
+
 export async function deleteCSSStyle(id: number, password_hashed: string): Promise<void> {
     let res = await fetch(`/api/css?id=${id}&password_hashed=${password_hashed}`, {
         method: 'DELETE',

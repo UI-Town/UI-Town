@@ -48,6 +48,17 @@ export function getCSSs(ids: number[]): Promise<CSS[] | Error> {
     });
 }
 
+export async function getCSS(id: number): Promise<CSS | Error> {
+    let csss = await getCSSs([id]);
+    if (csss instanceof Error) {
+        return csss;
+    }
+    if (csss.length === 0) {
+        return Error("ID does not exist");
+    }
+    return csss[0];
+}
+
 
 const isIDRow = (o: unknown): o is {id: number} => isOfType(o, {
     id: x => typeof x === 'number',
@@ -149,6 +160,25 @@ export async function createCSS(userID: number, password_hashed: string, name: s
                     resolve(this.lastID);
                 }
             });
+    });
+}
+
+
+export async function updateCSS(id: number, properties: {
+    name?: string,
+    html?: string,
+    css?: string,
+    category?: string,
+}): Promise<void | Error> {
+    let keys = Object.keys(properties).filter(v => properties[v as keyof typeof properties] !== undefined);
+
+    return new Promise(resolve => {
+        db.run(`UPDATE css SET ${keys.map(v => `${v} = ?`).join(', ')} WHERE id = ?`,
+            [...keys.map(v => properties[v as keyof typeof properties]), id],
+            err => {
+                resolve(err instanceof Error ? err : undefined);
+            }
+        );
     });
 }
 

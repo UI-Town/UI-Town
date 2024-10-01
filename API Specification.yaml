@@ -125,6 +125,38 @@ paths:
                 description: the ID of the CSS just created
         '400':
           $ref: '#/components/responses/400'
+    patch:
+      summary: Update Existing CSS
+      description: update existing css base on id and creator verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: number
+                  description: id of the CSS
+                password_hashed:
+                  type: string
+                  description: password_hashed of the creator of the CSS
+                name:
+                  type: string
+                html:
+                  type: string
+                css:
+                  type: string
+                category:
+                  $ref: '#/components/schemas/CSSCategory'
+              required:
+                - id
+                - password_hashed
+      responses:
+        200:
+          description: Ok
+        400:
+          $ref: '#/components/responses/400'
     delete:
       summary: Delete CSS
       description: delete a CSS base on id

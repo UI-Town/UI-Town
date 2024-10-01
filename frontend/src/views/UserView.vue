@@ -91,9 +91,9 @@ const patchUser = async (mode: 'name' | 'description' | 'icon') => {
 </script>
 
 <template>
-  <div class="absolute top-0 w-full">
-    <NavigationBar/>
-  </div>
+<!--  <div class="absolute top-0 w-full">-->
+<!--    <NavigationBar/>-->
+<!--  </div>-->
   <div v-if="user !== undefined" class="max-w-screen-lg bg-[linear-gradient(90deg,#004aad55,#cb6ce655)] h-screen mx-auto flex flex-col justify-start items-stretch lg:px-28 px-5 text-white overflow-scroll">
     <div class="mt-20 flex w-full">
       <input type="file" accept="image/*" class="hidden" ref="iconInput" @change="() => patchUser('icon')"/>

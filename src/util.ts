@@ -38,3 +38,13 @@ export function isOfType(o: unknown, properties: Record<string, (x: unknown) => 
 
     return true;
 }
+
+export function pick(o: Record<string, unknown>, keys: string[]): any {
+    let ret: Record<string, unknown> = {};
+
+    keys.forEach(v => {
+        ret[v] = o[v];
+    });
+
+    return ret;
+}
